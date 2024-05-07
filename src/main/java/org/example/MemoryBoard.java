@@ -12,8 +12,7 @@ public class MemoryBoard {
         JPanel panel = new JPanel(new GridLayout(4,4));
 
         for (int i = 0; i< 16; i++){
-            ImageIcon icon = new ImageIcon("C:\\Users\\nicol\\IdeaProjects\\MemoryGameTeko\\src\\main\\java\\org\\example\\Muster.jpg");
-            JLabel card = new JLabel(icon);
+            MemoryCard card = new MemoryCard();
             card.setBorder(BorderFactory.createLineBorder(Color.BLACK));
             card.setHorizontalAlignment(SwingConstants.CENTER);
             panel.add(card);
@@ -26,10 +25,26 @@ public class MemoryBoard {
 
 static class MemoryCard extends JLabel implements MouseListener{
 
+    ImageIcon backgroundIcon = new ImageIcon("C:\\Users\\nicol\\IdeaProjects\\MemoryGameTeko\\src\\main\\java\\org\\example\\Muster.jpg");
+    ImageIcon ape = new ImageIcon("C:\\Users\\nicol\\IdeaProjects\\MemoryGameTeko\\src\\main\\java\\org\\example\\ape.png");
+    ImageIcon eagle = new ImageIcon("C:\\Users\\nicol\\IdeaProjects\\MemoryGameTeko\\src\\main\\java\\org\\example\\eagle.png");
 
+    boolean isFlipped = false;
+
+    public MemoryCard(){
+        setIcon(backgroundIcon);
+        addMouseListener(this);
+    }
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        if (!isFlipped){
+            setIcon(ape);
+            isFlipped = true;
+        }else{
+            setIcon(backgroundIcon);
+            isFlipped = false;
+        }
 
     }
 
