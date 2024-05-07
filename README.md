@@ -4,7 +4,7 @@
 
 ## User Stories
 
-1. Spielfeld erstellen: Als Spieler möchte ich ein Spielfeld mit einer definierten Anzahl von Karten haben, um das Spiel zu starten.
+1. Spielfeld erstellen: Als Spieler möchte ich ein Spielfeld mit 16 Karten haben, um das Spiel zu starten.
 2. Karten anzeigen: Als Spieler möchte ich die Karten auf dem Spielfeld sehen, um sie später paarweise aufzudecken.
 3. Karten mischen: Als Spieler möchte ich, dass die Karten jedes Mal, wenn ich das Spiel starte, zufällig auf dem Spielfeld verteilt werden, um eine Herausforderung zu gewährleisten.
 4. Karten umdrehen: Als Spieler möchte ich die Möglichkeit haben, Karten umzudrehen, um das Bild auf der Rückseite zu sehen und sie mit anderen Karten zu vergleichen.
