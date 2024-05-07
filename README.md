@@ -14,7 +14,4 @@
 8. Punktzahl anzeigen: Als Spieler möchte ich meine Punktzahl sehen.
 9. Neues Spiel starten: Als Spieler möchte ich die Möglichkeit haben, ein neues Spiel zu starten, sobald das vorherige beendet ist.
    
-## Definition of Done
 
-1. Die Implementierung erfolgt gemäß den Anforderungen der User Stories.
-2. Die entwickelte Anwendung wird umfassend getestet, um sicherzustellen, dass sie stabil und fehlerfrei läuft.
