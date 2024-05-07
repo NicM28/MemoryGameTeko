@@ -9,10 +9,10 @@ public class MemoryBoard {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
-        JPanel panel = new JPanel(new GridLayout(6,6));
+        JPanel panel = new JPanel(new GridLayout(4,4));
 
-        for (int i = 0; i< 36; i++){
-            ImageIcon icon = new ImageIcon("Muster.jpg");
+        for (int i = 0; i< 16; i++){
+            ImageIcon icon = new ImageIcon("C:\\Users\\nicol\\IdeaProjects\\MemoryGameTeko\\src\\main\\java\\org\\example\\Muster.jpg");
             JLabel card = new JLabel(icon);
             card.setBorder(BorderFactory.createLineBorder(Color.BLACK));
             card.setHorizontalAlignment(SwingConstants.CENTER);
@@ -20,7 +20,7 @@ public class MemoryBoard {
         }
 
         frame.add(panel);
-        frame.setSize(600, 600);
+        frame.setSize(800, 800);
         frame.setVisible(true);
     }
 
