@@ -1,0 +1,80 @@
+# Detaillierte Erklärung des Memory Game Codes
+
+## Überblick
+Der vorliegende Code implementiert ein Memory-Spiel für zwei Spieler unter Verwendung von Java Swing. Das Spiel besteht aus einer 4x4-Anordnung von Karten, die die Spieler abwechselnd aufdecken, um Paare zu finden.
+
+## Hauptklasse: MemoryGame
+
+Die `MemoryGame`-Klasse ist das Herzstück der Anwendung und erbt von `JFrame`. Sie ist verantwortlich für:
+
+1. Initialisierung der Benutzeroberfläche
+2. Verwaltung des Spielzustands
+3. Steuerung des Spielablaufs
+
+### Wichtige Attribute:
+- `cardPanel`: JPanel zur Anzeige der Karten
+- `scoreLabel1`, `scoreLabel2`: JLabels für die Punktestände
+- `currentPlayerLabel`: JLabel für den aktuellen Spieler
+- `restartButton`: JButton zum Neustart des Spiels
+- `cards`: ArrayList zur Speicherung der Karten
+- `firstCard`, `secondCard`: Referenzen auf die aktuell aufgedeckten Karten
+- `timer`: Timer für die Verzögerung beim Kartenvergleich
+
+### Schlüsselmethoden:
+1. `initializeCards()`: Erstellt und mischt die Karten
+2. `checkCards()`: Vergleicht die aufgedeckten Karten
+3. `updateScore()`: Aktualisiert den Punktestand
+4. `switchPlayer()`: Wechselt den aktiven Spieler
+5. `endGame()`: Beendet das Spiel und zeigt den Gewinner an
+6. `restartGame()`: Setzt das Spiel zurück
+
+## Innere Klasse: Card
+
+Die `Card`-Klasse, eine innere Klasse von `MemoryGame`, erweitert `JButton` und repräsentiert eine einzelne Karte im Spiel.
+
+### Wichtige Attribute:
+- `id`: Eindeutige Kennung der Karte
+- `frontImage`, `backImage`: Vorder- und Rückseite der Karte
+- `faceUp`: Bool'scher Wert, ob die Karte aufgedeckt ist
+- `matched`: Bool'scher Wert, ob die Karte bereits gematcht wurde
+
+### Schlüsselmethoden:
+1. `flipCard()`: Dreht die Karte um
+2. `setMatched()`: Markiert die Karte als gematcht
+
+## Spielablauf
+
+1. **Initialisierung**: 
+   - Der Konstruktor von `MemoryGame` richtet die UI ein und ruft `initializeCards()` auf.
+   - `initializeCards()` erstellt 16 Karten (8 Paare), mischt sie und fügt sie dem `cardPanel` hinzu.
+
+2. **Spielzug**:
+   - Wenn ein Spieler eine Karte anklickt, wird die `actionPerformed()`-Methode der Karte ausgelöst.
+   - Die Karte wird umgedreht (`flipCard()`).
+   - Wenn es die erste Karte ist, wird sie als `firstCard` gespeichert.
+   - Wenn es die zweite Karte ist, wird sie als `secondCard` gespeichert und der `timer` gestartet.
+
+3. **Kartenvergleich**:
+   - Nach Ablauf des Timers wird `checkCards()` aufgerufen.
+   - Wenn die Karten übereinstimmen, werden sie als gematcht markiert und der Punktestand aktualisiert.
+   - Wenn nicht, werden sie wieder umgedreht und der Spieler gewechselt.
+
+4. **Spielende**:
+   - Wenn alle Paare gefunden wurden, wird `endGame()` aufgerufen.
+   - Der Gewinner wird angezeigt und der Neustart-Button wird sichtbar.
+
+## Besondere Merkmale
+
+1. **Fehlerbehandlung bei Bildern**: 
+   - Der Code prüft, ob die Bilder korrekt geladen wurden.
+   - Bei Fehlern werden Ersatztexte angezeigt.
+
+2. **Asynchrone Ausführung**: 
+   - Die Hauptmethode verwendet `SwingUtilities.invokeLater()`, um sicherzustellen, dass die GUI-Initialisierung im Event Dispatch Thread erfolgt.
+
+3. **Modularer Aufbau**: 
+   - Die Trennung von Spiellogik und UI-Komponenten ermöglicht eine einfache Erweiterung und Wartung.
+
+## Zusammenfassung
+
+Der Code demonstriert eine gut strukturierte Implementierung eines klassischen Spiels unter Verwendung von Java Swing. Er zeigt effektive Nutzung von objektorientierten Prinzipien, Event-Handling und grundlegende GUI-Programmierung.

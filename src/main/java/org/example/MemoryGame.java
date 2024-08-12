@@ -1,320 +1,246 @@
-// MemoryGame.java
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+package org.example;
 
-/**
- * Hauptklasse des Memory-Spiels.
- * Diese Klasse startet die JavaFX-Anwendung und initialisiert das MVC-Pattern.
- */
-public class MemoryGame extends Application {
-
-    /**
-     * Start-Methode der JavaFX-Anwendung.
-     * Hier wird das MVC-Pattern initialisiert und die Hauptszene gesetzt.
-     *
-     * @param primaryStage Die Hauptbühne der Anwendung
-     */
-    @Override
-    public void start(Stage primaryStage) {
-        // Initialisierung des Models
-        MemoryModel model = new MemoryModel();
-        
-        // Initialisierung des Controllers
-        MemoryController controller = new MemoryController(model);
-        
-        // Initialisierung der View
-        MemoryView view = new MemoryView(controller);
-        
-        // Setzen der Szene
-        Scene scene = new Scene(view.getRoot(), 400, 400);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Memory Game");
-        primaryStage.show();
-    }
-
-    /**
-     * Hauptmethode zum Starten der Anwendung.
-     *
-     * @param args Kommandozeilenargumente (werden nicht verwendet)
-     */
-    public static void main(String[] args) {
-        launch(args);
-    }
-}
-
-// MemoryModel.java
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /**
- * Model-Klasse des Memory-Spiels.
- * Diese Klasse verwaltet den Zustand des Spiels und die Logik.
+ * MemoryGame is a two-player card matching game implemented using Java Swing.
+ * Players take turns flipping cards to find matching pairs.
  */
-public class MemoryModel {
-    private List<String> cards;
-    private boolean[] flippedCards;
-    private int pairsFound;
+
+public class MemoryGame extends JFrame {
+    private JPanel cardPanel;
+    private JLabel scoreLabel1, scoreLabel2, currentPlayerLabel;
+    private JButton restartButton;
+    private ArrayList<Card> cards;
+    private Card firstCard, secondCard;
+    private Timer timer;
+    private int currentPlayer = 1;
+    private int score1 = 0, score2 = 0;
+    private int pairsFound = 0;
 
     /**
-     * Konstruktor der MemoryModel-Klasse.
-     * Initialisiert die Karten und den Spielzustand.
+     * Constructs a new MemoryGame, setting up the UI and initializing the game.
      */
-    public MemoryModel() {
-        initializeCards();
-        flippedCards = new boolean[16];
-        pairsFound = 0;
-    }
 
+    public MemoryGame() {
+        setTitle("Memory Game");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(600, 600);
+        setLayout(new BorderLayout());
+
+        cardPanel = new JPanel(new GridLayout(4, 4, 10, 10));
+        add(cardPanel, BorderLayout.CENTER);
+
+        JPanel scorePanel = new JPanel();
+        scoreLabel1 = new JLabel("Player 1: 0");
+        scoreLabel2 = new JLabel("Player 2: 0");
+        currentPlayerLabel = new JLabel("Current Player: 1");
+        scorePanel.add(scoreLabel1);
+        scorePanel.add(scoreLabel2);
+        scorePanel.add(currentPlayerLabel);
+        add(scorePanel, BorderLayout.NORTH);
+
+        restartButton = new JButton("Restart");
+        restartButton.addActionListener(e -> restartGame());
+        restartButton.setVisible(false);
+        add(restartButton, BorderLayout.SOUTH);
+
+        initializeCards();
+
+        timer = new Timer(750, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                checkCards();
+            }
+        });
+        timer.setRepeats(false);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
     /**
-     * Initialisiert die Karten des Spiels.
-     * Erstellt 8 Paare und mischt sie.
+     * Initializes the game cards, shuffles them, and adds them to the card panel.
      */
     private void initializeCards() {
         cards = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
-            cards.add(String.valueOf(i));
-            cards.add(String.valueOf(i));
+        String backImagePath = "images\\Muster.jpg";
+        ImageIcon backImage = new ImageIcon(backImagePath);
+
+        String[] imageNames = {"ape", "camelion", "eagle", "krokodil", "nashorn", "nilpferd", "schlange", "tiger"};
+
+        for (String imageName : imageNames) {
+            String frontImagePath = "images\\" + imageName + ".png";
+            ImageIcon frontImage = new ImageIcon(frontImagePath);
+            if (frontImage.getImageLoadStatus() != MediaTracker.COMPLETE) {
+                System.err.println("Failed to load front image: " + frontImagePath);
+            }
+
+            cards.add(new Card(frontImage, backImage, imageName));
+            cards.add(new Card(frontImage, backImage, imageName));
         }
         Collections.shuffle(cards);
-    }
 
-    /**
-     * Dreht eine Karte um und prüft, ob ein Paar gefunden wurde.
-     *
-     * @param index Der Index der umzudrehenden Karte
-     * @return true, wenn ein Paar gefunden wurde, sonst false
-     */
-    public boolean flipCard(int index) {
-        flippedCards[index] = true;
-        
-        // Prüfen, ob zwei Karten umgedreht sind
-        if (getFlippedCount() == 2) {
-            int firstIndex = getFirstFlippedIndex();
-            if (cards.get(firstIndex).equals(cards.get(index))) {
-                pairsFound++;
-                return true;
-            }
+        cardPanel.removeAll();
+        for (Card card : cards) {
+            cardPanel.add(card);
         }
-        return false;
+        cardPanel.revalidate();
+        cardPanel.repaint();
     }
-
     /**
-     * Zählt die Anzahl der aktuell umgedrehten Karten.
-     *
-     * @return Anzahl der umgedrehten Karten
+     * Checks if the two flipped cards match and updates the game state accordingly.
      */
-    public int getFlippedCount() {
-        int count = 0;
-        for (boolean flipped : flippedCards) {
-            if (flipped) count++;
+    private void checkCards() {
+        if (firstCard.getId().equals(secondCard.getId())) {
+            firstCard.setMatched(true);
+            secondCard.setMatched(true);
+            pairsFound++;
+            updateScore();
+        } else {
+            firstCard.flipCard();
+            secondCard.flipCard();
+            switchPlayer();
         }
-        return count;
-    }
 
-    /**
-     * Findet den Index der ersten umgedrehten Karte.
-     *
-     * @return Index der ersten umgedrehten Karte
-     */
-    public int getFirstFlippedIndex() {
-        for (int i = 0; i < flippedCards.length; i++) {
-            if (flippedCards[i]) return i;
-        }
-        return -1;
-    }
+        firstCard = null;
+        secondCard = null;
 
-    /**
-     * Dreht alle Karten wieder um.
-     */
-    public void resetFlippedCards() {
-        for (int i = 0; i < flippedCards.length; i++) {
-            flippedCards[i] = false;
+        if (pairsFound == 8) {
+            endGame();
         }
     }
-
     /**
-     * Prüft, ob das Spiel beendet ist.
-     *
-     * @return true, wenn alle Paare gefunden wurden, sonst false
+     * Updates the score for the current player.
      */
-    public boolean isGameOver() {
-        return pairsFound == 8;
-    }
-
-    /**
-     * Gibt den Wert einer Karte zurück.
-     *
-     * @param index Der Index der Karte
-     * @return Der Wert der Karte als String
-     */
-    public String getCardValue(int index) {
-        return cards.get(index);
-    }
-
-    /**
-     * Prüft, ob eine Karte umgedreht ist.
-     *
-     * @param index Der Index der Karte
-     * @return true, wenn die Karte umgedreht ist, sonst false
-     */
-    public boolean isCardFlipped(int index) {
-        return flippedCards[index];
-    }
-}
-
-// MemoryController.java
-
-/**
- * Controller-Klasse des Memory-Spiels.
- * Diese Klasse vermittelt zwischen Model und View.
- */
-public class MemoryController {
-    private MemoryModel model;
-
-    /**
-     * Konstruktor der MemoryController-Klasse.
-     *
-     * @param model Das MemoryModel-Objekt
-     */
-    public MemoryController(MemoryModel model) {
-        this.model = model;
-    }
-
-    /**
-     * Verarbeitet einen Klick auf eine Karte.
-     *
-     * @param index Der Index der angeklickten Karte
-     * @return true, wenn ein Paar gefunden wurde, sonst false
-     */
-    public boolean handleCardClick(int index) {
-        if (model.isCardFlipped(index)) return false;
-        
-        boolean pairFound = model.flipCard(index);
-        
-        if (model.getFlippedCount() == 2) {
-            if (!pairFound) {
-                // Karten wieder umdrehen, wenn kein Paar gefunden wurde
-                model.resetFlippedCards();
-            }
-        }
-        
-        return pairFound;
-    }
-
-    /**
-     * Prüft, ob das Spiel beendet ist.
-     *
-     * @return true, wenn das Spiel beendet ist, sonst false
-     */
-    public boolean isGameOver() {
-        return model.isGameOver();
-    }
-
-    /**
-     * Gibt den Wert einer Karte zurück.
-     *
-     * @param index Der Index der Karte
-     * @return Der Wert der Karte als String
-     */
-    public String getCardValue(int index) {
-        return model.getCardValue(index);
-    }
-
-    /**
-     * Prüft, ob eine Karte umgedreht ist.
-     *
-     * @param index Der Index der Karte
-     * @return true, wenn die Karte umgedreht ist, sonst false
-     */
-    public boolean isCardFlipped(int index) {
-        return model.isCardFlipped(index);
-    }
-}
-
-// MemoryView.java
-import javafx.scene.control.Button;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
-
-/**
- * View-Klasse des Memory-Spiels.
- * Diese Klasse ist für die grafische Darstellung des Spiels verantwortlich.
- */
-public class MemoryView {
-    private MemoryController controller;
-    private GridPane grid;
-    private Button[] cardButtons;
-
-    /**
-     * Konstruktor der MemoryView-Klasse.
-     *
-     * @param controller Der MemoryController
-     */
-    public MemoryView(MemoryController controller) {
-        this.controller = controller;
-        initializeView();
-    }
-
-    /**
-     * Initialisiert die grafische Oberfläche des Spiels.
-     */
-    private void initializeView() {
-        grid = new GridPane();
-        cardButtons = new Button[16];
-
-        for (int i = 0; i < 16; i++) {
-            final int index = i;
-            Button button = new Button("?");
-            button.setPrefSize(80, 80);
-            button.setOnAction(e -> handleButtonClick(index));
-            cardButtons[i] = button;
-            grid.add(button, i % 4, i / 4);
+    private void updateScore() {
+        if (currentPlayer == 1) {
+            score1++;
+            scoreLabel1.setText("Player 1: " + score1);
+        } else {
+            score2++;
+            scoreLabel2.setText("Player 2: " + score2);
         }
     }
-
     /**
-     * Verarbeitet einen Klick auf einen Kartenbutton.
-     *
-     * @param index Der Index des geklickten Buttons
+     * Switches the current player.
      */
-    private void handleButtonClick(int index) {
-        boolean pairFound = controller.handleCardClick(index);
-        updateView();
-        
-        if (controller.isGameOver()) {
-            showGameOverMessage();
-        }
+    private void switchPlayer() {
+        currentPlayer = (currentPlayer == 1) ? 2 : 1;
+        currentPlayerLabel.setText("Current Player: " + currentPlayer);
     }
-
     /**
-     * Aktualisiert die Ansicht des Spielfelds.
+     * Ends the game, displaying the winner and showing the restart button.
      */
-    private void updateView() {
-        for (int i = 0; i < 16; i++) {
-            if (controller.isCardFlipped(i)) {
-                cardButtons[i].setText(controller.getCardValue(i));
+    private void endGame() {
+        String winner = (score1 > score2) ? "Player 1 wins!" : (score2 > score1) ? "Player 2 wins!" : "It's a tie";
+        JOptionPane.showMessageDialog(this, "Game Over! " + winner );
+        restartButton.setVisible(true);
+    }
+    /**
+     * Restarts the game, resetting scores and reinitializing cards.
+     */
+    private void restartGame() {
+        score1 = 0;
+        score2 = 0;
+        pairsFound = 0;
+        currentPlayer = 1;
+        scoreLabel1.setText("Player 1: 0");
+        scoreLabel2.setText("Player 2: 0");
+        currentPlayerLabel.setText("Current Player: 1");
+        restartButton.setVisible(false);
+        initializeCards();
+    }
+    /**
+     * Represents a single card in the memory game.
+     */
+    private class Card extends JButton {
+        private String id;
+        private ImageIcon frontImage;
+        private ImageIcon backImage;
+        private boolean faceUp = false;
+        private boolean matched = false;
+
+        /**
+         * Constructs a new Card with the given images and ID.
+         *
+         * @param frontImage The image shown when the card is face up.
+         * @param backImage The image shown when the card is face down.
+         * @param id The unique identifier for the card.
+         */
+        public Card(ImageIcon frontImage, ImageIcon backImage, String id) {
+            this.frontImage = frontImage;
+            this.backImage = backImage;
+            this.id = id;
+
+            if (backImage.getImageLoadStatus() != MediaTracker.COMPLETE) {
+                System.err.println("Failed to load back image for card: " + id);
+                setText("?");
             } else {
-                cardButtons[i].setText("?");
+                setIcon(backImage);
             }
+
+            if (frontImage.getImageLoadStatus() != MediaTracker.COMPLETE) {
+                System.err.println("Failed to load front image for card: " + id);
+                setText(id);
+            }
+
+            setPreferredSize(new Dimension(100, 100));
+
+            addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (!faceUp && !matched && !timer.isRunning()) {
+                        flipCard();
+                        if (firstCard == null) {
+                            firstCard = Card.this;
+                        } else if (secondCard == null && firstCard != Card.this) {
+                            secondCard = Card.this;
+                            timer.start();
+                        }
+                    }
+                }
+            });
+        }
+        /**
+         * Gets the ID of the card.
+         *
+         * @return The card's ID.
+         */
+        public String getId() {
+            return id;
+        }
+        /**
+         * Sets whether the card has been matched.
+         *
+         * @param matched True if the card has been matched, false otherwise.
+         */
+        public void setMatched(boolean matched) {
+            this.matched = matched;
+            setEnabled(!matched);
+        }
+        /**
+         * Flips the card, changing its face-up state and displayed image.
+         */
+        public void flipCard() {
+            faceUp = !faceUp;
+            setIcon(faceUp ? frontImage : backImage);
         }
     }
-
     /**
-     * Zeigt eine Nachricht an, wenn das Spiel beendet ist.
-     */
-    private void showGameOverMessage() {
-        // Hier könnte eine Meldung angezeigt werden, z.B. ein Alert
-        System.out.println("Spiel beendet! Alle Paare gefunden!");
-    }
-
-    /**
-     * Gibt das Wurzelelement der View zurück.
+     * The main method to start the Memory Game application.
      *
-     * @return Das Wurzelelement (GridPane) der View
+     * @param args Command line arguments (not used).
      */
-    public StackPane getRoot() {
-        return new StackPane(grid);
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new MemoryGame();
+            }
+        });
     }
 }
