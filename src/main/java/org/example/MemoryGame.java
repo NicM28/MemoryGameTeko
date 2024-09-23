@@ -6,6 +6,12 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * MemoryGame is a Swing-based implementation of the classic memory matching game.
+ * Players take turns flipping cards to find matching pairs. The game supports
+ * both normal and hard modes, where hard mode shuffles unmatched cards after each turn.
+ */
+
 public class MemoryGame extends JFrame {
     private JPanel cardPanel;
     private JLabel scoreLabel1, scoreLabel2, currentPlayerLabel;
@@ -17,6 +23,10 @@ public class MemoryGame extends JFrame {
     private int score1 = 0, score2 = 0;
     private int pairsFound = 0;
     private boolean hardMode = false;
+
+    /**
+     * Constructs a new MemoryGame, setting up the UI and initializing the game.
+     */
 
     public MemoryGame() {
         setTitle("Memory Game");
@@ -62,6 +72,11 @@ public class MemoryGame extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Initializes the cards for the game, creating pairs of matching cards
+     * and adding them to the card panel.
+     */
+
     private void initializeCards() {
         cards = new ArrayList<>();
         String backImagePath = "images\\Muster.jpg";
@@ -82,6 +97,10 @@ public class MemoryGame extends JFrame {
         shuffleCards();
     }
 
+    /**
+     * Shuffles the cards and resets the card panel.
+     */
+
     private void shuffleCards() {
         Collections.shuffle(cards);
         cardPanel.removeAll();
@@ -91,6 +110,11 @@ public class MemoryGame extends JFrame {
         cardPanel.revalidate();
         cardPanel.repaint();
     }
+
+    /**
+     * Checks if the two flipped cards match. If they do, updates the score and checks for game end.
+     * If they don't match, flips them back and switches to the other player.
+     */
 
     private void checkCards() {
         if (firstCard.getId().equals(secondCard.getId())) {
@@ -117,6 +141,10 @@ public class MemoryGame extends JFrame {
         }
     }
 
+    /**
+     * Switches the current player and, if in hard mode, shuffles the unmatched cards.
+     */
+
     private void switchPlayer() {
         currentPlayer = (currentPlayer == 1) ? 2 : 1;
         currentPlayerLabel.setText("Current Player: " + currentPlayer);
@@ -124,6 +152,11 @@ public class MemoryGame extends JFrame {
             shuffleUnmatchedCards();
         }
     }
+
+    /**
+     * Shuffles all unmatched and face-down cards on the board.
+     * This method is called in hard mode after each player's turn.
+     */
 
     private void shuffleUnmatchedCards() {
         ArrayList<Card> unmatchedCards = new ArrayList<>();
@@ -153,6 +186,10 @@ public class MemoryGame extends JFrame {
         cardPanel.repaint();
     }
 
+    /**
+     * Updates the score for the current player and refreshes the score display.
+     */
+
     private void updateScore() {
         if (currentPlayer == 1) {
             score1++;
@@ -163,11 +200,19 @@ public class MemoryGame extends JFrame {
         }
     }
 
+    /**
+     * Ends the game, displays the winner, and shows the restart button.
+     */
+
     private void endGame() {
         String winner = (score1 > score2) ? "Player 1 wins!" : (score2 > score1) ? "Player 2 wins!" : "It's a tie";
         JOptionPane.showMessageDialog(this, "Game Over! " + winner);
         restartButton.setVisible(true);
     }
+
+    /**
+     * Restarts the game, resetting scores, shuffling cards, and hiding the restart button.
+     */
 
     private void restartGame() {
         score1 = 0;
@@ -181,6 +226,10 @@ public class MemoryGame extends JFrame {
         initializeCards();
     }
 
+    /**
+     * Toggles between normal and hard mode, restarting the game afterwards.
+     */
+
     private void switchMode() {
         hardMode = !hardMode;
         String mode = hardMode ? "Hard" : "Normal";
@@ -188,12 +237,25 @@ public class MemoryGame extends JFrame {
         restartGame();
     }
 
+    /**
+     * Represents a card in the memory game.
+     * Each card has a front and back image, and can be flipped and matched.
+     */
+
     private class Card extends JButton {
         private String id;
         private ImageIcon frontImage;
         private ImageIcon backImage;
         private boolean faceUp = false;
         private boolean matched = false;
+
+        /**
+         * Constructs a new Card with the given front and back images and an identifier.
+         *
+         * @param frontImage The image shown when the card is face up
+         * @param backImage The image shown when the card is face down
+         * @param id The unique identifier for this card
+         */
 
         public Card(ImageIcon frontImage, ImageIcon backImage, String id) {
             this.frontImage = frontImage;
@@ -230,28 +292,62 @@ public class MemoryGame extends JFrame {
             });
         }
 
+        /**
+         * Returns the unique identifier of this card.
+         *
+         * @return The card's identifier
+         */
+
         public String getId() {
             return id;
         }
+
+        /**
+         * Sets the matched state of the card and updates its enabled state.
+         *
+         * @param matched true if the card has been matched, false otherwise
+         */
 
         public void setMatched(boolean matched) {
             this.matched = matched;
             setEnabled(!matched);
         }
 
+        /**
+         * Checks if the card has been matched.
+         *
+         * @return true if the card is matched, false otherwise
+         */
+
         public boolean isMatched() {
             return matched;
         }
 
+        /**
+         * Checks if the card is currently face up.
+         *
+         * @return true if the card is face up, false otherwise
+         */
+
         public boolean isFaceUp() {
             return faceUp;
         }
+
+        /**
+         * Flips the card, changing its face-up state and displayed image.
+         */
 
         public void flipCard() {
             faceUp = !faceUp;
             setIcon(faceUp ? frontImage : backImage);
         }
     }
+
+    /**
+     * The main method to start the Memory Game application.
+     *
+     * @param args Command line arguments (not used)
+     */
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
